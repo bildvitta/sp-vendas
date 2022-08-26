@@ -5,11 +5,16 @@ namespace BildVitta\SpVendas\Console\Commands;
 use App\Models\HubCompany;
 use App\Models\User;
 use BildVitta\SpCrm\Models\Customer;
+use BildVitta\SpProduto\Models\Accessory;
+use BildVitta\SpProduto\Models\AccessoryCategory;
 use BildVitta\SpProduto\Models\BuyingOption;
 use BildVitta\SpProduto\Models\ProposalModel;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
+use BildVitta\SpVendas\Models\Personalization;
 use BildVitta\SpVendas\Models\RealEstateAgency;
 use BildVitta\SpVendas\Models\Sale;
+use BildVitta\SpVendas\Models\SaleAccessory;
+use BildVitta\SpVendas\Models\SalePeriodicity;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
@@ -34,6 +39,9 @@ class DataImportCommand extends Command
         'hub_companies',
         'real_estate_agencies',
         'sales',
+        'sale_accessories',
+        'sale_periodicities',
+        'sale_personalizations',
     ];
 
     /**
@@ -130,9 +138,72 @@ class DataImportCommand extends Command
                     'user_hub_manager' => User::class,
                     'user_hub_supervisor' => User::class,
                     'justified_user' => User::class,
+                ], [
+                'created_at',
+                'updated_at',
+                'deleted_at',
+                'customer_justified_at',
+                'justified_at',
+                'signed_contract_at',
+                'bill_paid_at',
+            ], ['user_hub_seller', 'user_hub_manager', 'user_hub_supervisor', 'justified_user']
+            );
+        }
+
+        // Sale Accessories
+        if (in_array('sale_accessories', $this->sync)) {
+            $sale_accessories = $database->table('sale_accessories as sa')
+                ->leftJoin('sales as sl', 'sa.sale_id', '=', 'sl.id')
+                ->leftJoin(config('sp-produto.table_prefix') . 'accessories as ae', 'sa.accessory_id', '=', 'ae.id')
+                ->leftJoin(config('sp-produto.table_prefix') . 'accessory_categories as ac', 'sa.accessory_category_id', '=', 'ac.id')
+                ->select(
+                    'sa.*',
+                    'sl.uuid as sale_uuid',
+                    'ae.uuid as accessory_uuid',
+                    'ac.uuid as accessory_category_uuid',
+                );
+
+            $this->syncData(
+                $sale_accessories,
+                SaleAccessory::class,
+                'SaleAccessory',
+                [
+                    'sale' => Sale::class,
+                    'accessory' => Accessory::class,
+                    'accessory_category' => AccessoryCategory::class,
                 ],
-                ['created_at', 'updated_at', 'deleted_at'],
-                ['user_hub_seller', 'user_hub_manager', 'user_hub_supervisor', 'justified_user']
+                ['created_at', 'updated_at', 'deleted_at']
+            );
+        }
+
+        // Sale Periodicities
+        if (in_array('sale_periodicities', $this->sync)) {
+            $sale_periodicities = $database->table('sale_periodicities as sp')
+                ->leftJoin('sales as sl', 'sp.sale_id', '=', 'sl.id')
+                ->select('sp.*', 'sl.uuid as sale_uuid');
+
+            $this->syncData(
+                $sale_periodicities,
+                SalePeriodicity::class,
+                'SalePeriodicity',
+                ['sale' => Sale::class],
+                ['created_at', 'updated_at', 'deleted_at']
+            );
+        }
+
+        // Sale Personalizations
+        if (in_array('sale_personalizations', $this->sync)) {
+            $sale_personalizations = $database->table('sale_personalizations as sp')
+                ->leftJoin('sales as sl', 'sp.sale_id', '=', 'sl.id')
+                ->leftJoin(config('sp-produto.table_prefix') . 'units as un', 'sp.unit_id', '=', 'un.id')
+                ->select('sp.*', 'sl.uuid as sale_uuid', 'un.uuid as unit_uuid');
+
+            $this->syncData(
+                $sale_personalizations,
+                Personalization::class,
+                'SalePersonalization',
+                ['sale' => Sale::class, 'unit' => RealEstateDevelopment\Unit::class],
+                ['created_at', 'updated_at', 'deleted_at']
             );
         }
     }

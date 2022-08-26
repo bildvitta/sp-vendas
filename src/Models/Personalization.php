@@ -32,6 +32,7 @@ class Personalization extends BaseModel
         'file',
         'value',
         'type',
+        'unit_id',
     ];
 
     /**
