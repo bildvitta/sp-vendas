@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    private string $tableName;
+
+    public function __construct()
+    {
+        $this->tableName = config('sp-vendas.table_prefix') . 'sale_periodicities';
+    }
+
+    public function up()
+    {
+        if (!Schema::hasTable($this->tableName)) {
+            Schema::create($this->tableName, function (Blueprint $table) {
+                $table->id();
+                $table->uuid('uuid')->unique();
+                $table->foreignId('sale_id');
+                $table->string('periodicity');
+                $table->bigInteger('installments');
+                $table->float('installment_price');
+                $table->date('due_at');
+                $table->timestamps();
+                $table->softDeletes();
+
+                Schema::disableForeignKeyConstraints();
+                $table->foreign('sale_id', 'vendas_sale_vendas_periodicities')->references('id')->on(
+                    config('sp-vendas.table_prefix') . 'sales'
+                )->onUpdate('cascade')->onDelete('cascade');
+                Schema::enableForeignKeyConstraints();
+            });
+        }
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists($this->tableName);
+    }
+};

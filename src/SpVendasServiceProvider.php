@@ -3,7 +3,6 @@
 namespace BildVitta\SpVendas;
 
 use BildVitta\SpVendas\Console\Commands\DataImportCommand;
-use BildVitta\SpVendas\Console\Commands\Messages\SaleWorkerCommand;
 use BildVitta\SpVendas\Console\InstallSp;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -30,7 +29,13 @@ class SpVendasServiceProvider extends PackageServiceProvider
         $package
             ->name('sp-vendas')
             ->hasConfigFile(['sp-vendas'])
-            ->hasMigrations([])
+            ->hasMigrations([
+                'create_sp_vendas_real_estate_agencies_table', // must be the first
+                'create_sp_vendas_sales_table', // must be before other sale tables
+                'create_sp_vendas_sale_accessories_table',
+                'create_sp_vendas_sale_periodicities_table',
+                'create_sp_vendas_sale_personalizations_table',
+            ])
             ->runsMigrations();
 
         $package
@@ -38,7 +43,6 @@ class SpVendasServiceProvider extends PackageServiceProvider
             ->hasCommands([
                 InstallSp::class,
                 DataImportCommand::class,
-                SaleWorkerCommand::class,
             ]);
     }
 }
