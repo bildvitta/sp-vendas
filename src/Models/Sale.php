@@ -48,7 +48,7 @@ class Sale extends BaseModel
     public function __construct()
     {
         parent::__construct();
-        $this->table = config('sp-vendas.table_prefix') . 'real_estate_agencies';
+        $this->table = config('sp-vendas.table_prefix') . 'sales';
     }
 
     /**
