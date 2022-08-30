@@ -55,6 +55,10 @@ class RealEstateAgency extends BaseModel
         'representative_two_document',
         'representative_two_rg',
         'external_code',
+        'hub_company_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     protected $guarded = [

@@ -32,6 +32,9 @@ class SaleAccessory extends BaseModel
         'accessory_category_id',
         'accessory_id',
         'uuid',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     /**

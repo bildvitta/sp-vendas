@@ -52,6 +52,9 @@ class SalePeriodicity extends BaseModel
         'installment_price',
         'due_at',
         'sale_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     /**

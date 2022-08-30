@@ -89,6 +89,9 @@ class Sale extends BaseModel
         'signed_contract_at',
         'bill_paid_at',
         'made_by',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     /**
