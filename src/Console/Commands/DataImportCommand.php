@@ -138,15 +138,17 @@ class DataImportCommand extends Command
                     'user_hub_manager' => User::class,
                     'user_hub_supervisor' => User::class,
                     'justified_user' => User::class,
-                ], [
-                'created_at',
-                'updated_at',
-                'deleted_at',
-                'customer_justified_at',
-                'justified_at',
-                'signed_contract_at',
-                'bill_paid_at',
-            ], ['user_hub_seller', 'user_hub_manager', 'user_hub_supervisor', 'justified_user']
+                ],
+                [
+                    'created_at',
+                    'updated_at',
+                    'deleted_at',
+                    'customer_justified_at',
+                    'justified_at',
+                    'signed_contract_at',
+                    'bill_paid_at',
+                ],
+                ['user_hub_seller', 'user_hub_manager', 'user_hub_supervisor', 'justified_user']
             );
         }
 
@@ -240,7 +242,6 @@ class DataImportCommand extends Command
 
                 $query->get()->each(function ($item) use ($model, $related, $dates, $uuid_names, $bar) {
                     foreach ($related as $name => $object) {
-
                         $uuid = in_array($name, $uuid_names) ? 'hub_uuid' : 'uuid';
 
                         $relatedObject = $object::where($uuid, $item->{sprintf('%s_uuid', $name)});
