@@ -16,6 +16,11 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 class SpVendasServiceProvider extends PackageServiceProvider
 {
     /**
+     * @var string $seeder
+     */
+    protected string $seeder = 'SpVendasSeeder';
+    
+    /**
      * @param  Package  $package
      *
      * @return void
@@ -46,5 +51,10 @@ class SpVendasServiceProvider extends PackageServiceProvider
                 SalesWorkerCommand::class,
                 DataImportCommand::class,
             ]);
+
+        $this->publishes([
+            $package->basePath("/../database/seeders/{$this->seeder}.php.stub")
+            => database_path("seeders/{$this->seeder}.php")
+        ], 'seeders');
     }
 }
