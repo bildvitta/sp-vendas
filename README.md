@@ -10,7 +10,7 @@ The SP (Space Probe) package is responsible for collecting remote data updates f
 You can install the package via composer:
 
 ```bash 
-composer require bildvitta/sp-vendas:dev-develop
+composer require bildvitta/sp-vendas
 ```
 
 For everything to work perfectly in addition to having the settings file published in your application, run the command below:
@@ -45,8 +45,26 @@ return [
 ];
 ```
 
-With the configuration file sp-vendas.php published in your configuration folder it is necessary to create environment variables in your .env file:
+## Importing data
 
+You can import initial data from the parent module by setting the database connection data in the configuration file. However, it will be necessary to import the data from the dependent modules first: sp-hub, sp-crm and sp-produto.
+
+```bash
+php artisan dataimport:vendas_sales
 ```
-MS_SP_VENDAS_TABLE_PREFIX="vendas_"
+
+## Database seeder
+
+You can seed your database with fake data to work with. However, it will be necessary to seed the other dependencies first: sp-hub, sp-crm and sp-produto.
+
+```bash
+php artisan db:seed --class=SpVendasSeeder
+```
+
+## Running the worker
+
+After setting the message broker access data in the configuration file, you can run the worker to keep the data up to date.
+
+```bash
+php artisan rabbitmqworker:sales
 ```

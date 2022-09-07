@@ -2,6 +2,9 @@
 
 namespace BildVitta\SpVendas\Models;
 
+use BildVitta\SpVendas\Factories\SalePeriodicityFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -12,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class SalePeriodicity extends BaseModel
 {
+    use HasFactory;
     use SoftDeletes;
 
     public const PERIODICITY_LIST = [
@@ -33,10 +37,20 @@ class SalePeriodicity extends BaseModel
         'real_estate_development_exchange' => 'Dação em pagamento - Imóvel',
     ];
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->table = config('sp-vendas.table_prefix') . 'sale_periodicities';
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return Factory
+     */
+    protected static function newFactory(): Factory
+    {
+        return SalePeriodicityFactory::new();
     }
 
     /**
@@ -46,7 +60,6 @@ class SalePeriodicity extends BaseModel
      */
     protected $fillable = [
         'uuid',
-        'proposal_model_id',
         'periodicity',
         'installments',
         'installment_price',
