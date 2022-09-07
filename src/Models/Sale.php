@@ -10,6 +10,9 @@ use BildVitta\SpProduto\Models\ProposalModel;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
 use BildVitta\SpProduto\Models\RealEstateDevelopment\Blueprint;
 use BildVitta\SpProduto\Models\RealEstateDevelopment\Unit;
+use BildVitta\SpVendas\Factories\SaleFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Sale extends BaseModel
 {
+    use HasFactory;
     use SoftDeletes;
 
     /**
@@ -45,10 +49,20 @@ class Sale extends BaseModel
         'vitta_welcome_campaign' => 'Vitta Boas Vindas',
     ];
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->table = config('sp-vendas.table_prefix') . 'sales';
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return Factory
+     */
+    protected static function newFactory(): Factory
+    {
+        return SaleFactory::new();
     }
 
     /**
@@ -259,6 +273,14 @@ class Sale extends BaseModel
     public function has_personalization(): int
     {
         return $this->personalizations()->count();
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function real_estate_development(): BelongsTo
+    {
+        return $this->belongsTo(RealEstateDevelopment::class);
     }
 
     /**
