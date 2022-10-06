@@ -19,7 +19,7 @@ class SpVendasServiceProvider extends PackageServiceProvider
      * @var string $seeder
      */
     protected string $seeder = 'SpVendasSeeder';
-    
+
     /**
      * @param  Package  $package
      *
@@ -41,8 +41,9 @@ class SpVendasServiceProvider extends PackageServiceProvider
                 'create_sp_vendas_sale_accessories_table',
                 'create_sp_vendas_sale_periodicities_table',
                 'create_sp_vendas_sale_personalizations_table',
-            ])
-            ->runsMigrations();
+                'alter_sp_vendas_real_estate_agency_id_column_in_sales_table',
+                'drop_sp_vendas_real_estate_agencies_table',
+            ]);
 
         $package
             ->name('sp-vendas')

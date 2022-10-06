@@ -8,10 +8,10 @@ use BildVitta\SpProduto\Models\ProposalModel;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
 use BildVitta\SpProduto\Models\RealEstateDevelopment\Unit;
 use BildVitta\SpVendas\Models\Personalization;
-use BildVitta\SpVendas\Models\RealEstateAgency;
 use BildVitta\SpVendas\Models\Sale;
 use BildVitta\SpVendas\Models\SaleAccessory;
 use BildVitta\SpVendas\Models\SalePeriodicity;
+use App\Models\HubCompany;
 use PhpAmqpLib\Message\AMQPMessage;
 use stdClass;
 use Throwable;
@@ -125,7 +125,7 @@ class MessageSale
             'user_hub_manager_id' => $this->syncRelated('user_hub_manager', $this->modelUser, 'hub_uuid'),
             'user_hub_supervisor_id' => $this->syncRelated('user_hub_supervisor', $this->modelUser, 'hub_uuid'),
             'justified_user_id' => $this->syncRelated('justified_user', $this->modelUser, 'hub_uuid'),
-            'real_estate_agency_id' => $this->syncRelated('real_estate_agency', RealEstateAgency::class),
+            'hub_company_real_estate_agency_id' => $this->syncRelated('hub_company_real_estate_agency', HubCompany::class),
         ];
 
         return Sale::updateOrCreate(['uuid' => $this->sale->uuid], $data);

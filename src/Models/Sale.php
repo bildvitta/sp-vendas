@@ -83,7 +83,7 @@ class Sale extends BaseModel
         'buying_options_id',
         'contract_ref_uuid',
         'concretized',
-        'real_estate_agency_id',
+        'hub_company_real_estate_agency_id',
         'special_needs',
         'input',
         'price_total',
@@ -244,9 +244,14 @@ class Sale extends BaseModel
         return $this->hasMany(SaleAccessory::class);
     }
 
-    public function real_estate_agency(): BelongsTo
+    public function real_estate_agency()
     {
-        return $this->belongsTo(RealEstateAgency::class, 'real_estate_agency_id', 'id');
+        return $this->hub_company_real_estate_agency();
+    }
+
+    public function hub_company_real_estate_agency()
+    {
+        return $this->belongsTo(app(config('hub.model_company')), 'hub_company_real_estate_agency_id', 'id')->withTrashed();
     }
 
     /**
