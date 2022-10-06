@@ -21,7 +21,7 @@ class InstallSp extends Command
      */
     private const VENDOR_PUBLISH_CONFIG_PARAMS = [
         '--provider' => SpVendasServiceProvider::class,
-        '--tag' => 'sp-vendas-config'
+        '--tag' => 'sp-vendas-config',
     ];
 
     /**
@@ -30,7 +30,8 @@ class InstallSp extends Command
      * @const array
      */
     private const VENDOR_PUBLISH_MIGRATION_PARAMS = [
-        '--provider' => SpVendasServiceProvider::class
+        '--provider' => SpVendasServiceProvider::class,
+        '--tag' => 'sp-vendas-migrations',
     ];
 
     /**
@@ -54,64 +55,46 @@ class InstallSp extends Command
     {
         $this->info('Installing SP Vendas...');
 
-        $this->info('Publishing configuration...');
-
-        if (! $this->configExists('sp-vendas.php')) {
+        if (! $this->configExists()) {
             $this->publishConfiguration();
-            $this->info('Published configuration');
         } elseif ($this->shouldOverwriteConfig()) {
-            $this->info('Overwriting configuration file...');
-            $this->publishConfiguration($force = true);
-        } else {
-            $this->info('Existing configuration was not overwritten');
+            $this->publishConfiguration(true);
         }
 
-        $this->info('Finish configuration!');
-
-        $this->info('Publishing migration...');
+        $this->publishMigration();
 
         if ($this->shouldRunMigrations()) {
-            $this->publishMigration();
+            $this->runMigrations();
         }
 
-        $this->info('Finish migration!');
-
-        $this->runMigrations();
-
-        $this->info('Publishing database seeders...');
+        $this->publishSeeders();
 
         if ($this->shouldRunSeeders()) {
-            $this->publishSeeders();
+            $this->runSeeders();
         }
-
-        $this->runSeeders();
-
-        $this->info('Finish database seeders!');
 
         $this->info('Installed SPPackage');
     }
 
     /**
-     * @param  string  $fileName
-     *
      * @return bool
      */
-    private function configExists(string $fileName): bool
+    private function configExists(): bool
     {
-        return File::exists(config_path($fileName));
+        return File::exists(config_path('sp-vendas.php'));
     }
 
     /**
-     * @param  bool|false  $forcePublish
+     * @param bool|false $forcePublish
      *
      * @return void
      */
-    private function publishConfiguration($forcePublish = false): void
+    private function publishConfiguration(bool $forcePublish = false): void
     {
         $params = self::VENDOR_PUBLISH_CONFIG_PARAMS;
 
         if ($forcePublish === true) {
-            $params['--force'] = '';
+            $params['--force'] = '--force';
         }
 
         $this->call('vendor:publish', $params);
@@ -156,7 +139,8 @@ class InstallSp extends Command
     {
         $this->call('vendor:publish', [
             '--provider' => SpVendasServiceProvider::class,
-            '--tag' => 'seeders'
+            '--tag' => 'seeders',
+            '--force' => '--force',
         ]);
     }
 
@@ -164,7 +148,7 @@ class InstallSp extends Command
     {
         $this->info('Run seeders.');
         $this->call('db:seed', [
-            '--class' => 'SpVendasSeeder'
+            '--class' => 'SpVendasSeeder',
         ]);
         $this->newLine();
         $this->info('Finish seeders.');

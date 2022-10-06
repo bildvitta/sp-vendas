@@ -11,7 +11,6 @@ use BildVitta\SpProduto\Models\BuyingOption;
 use BildVitta\SpProduto\Models\ProposalModel;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
 use BildVitta\SpVendas\Models\Personalization;
-use BildVitta\SpVendas\Models\RealEstateAgency;
 use BildVitta\SpVendas\Models\Sale;
 use BildVitta\SpVendas\Models\SaleAccessory;
 use BildVitta\SpVendas\Models\SalePeriodicity;
@@ -78,25 +77,10 @@ class DataImportCommand extends Command
             );
         }
 
-        // Real Estate Agencies
-        if (in_array('real_estate_agencies', $this->sync)) {
-            $real_estate_agencies = $database->table('real_estate_agencies as ra')
-                ->leftJoin('hub_companies as hc', 'ra.hub_company_id', '=', 'hc.id')
-                ->select('ra.*', 'hc.uuid as hub_company_uuid');
-
-            $this->syncData(
-                $real_estate_agencies,
-                RealEstateAgency::class,
-                'RealEstateAgency',
-                ['hub_company' => HubCompany::class],
-                ['created_at', 'updated_at', 'deleted_at']
-            );
-        }
-
         // Sales
         if (in_array('sales', $this->sync)) {
             $sales = $database->table('sales as sl')
-                ->leftJoin('real_estate_agencies as ra', 'sl.real_estate_agency_id', '=', 'ra.id')
+                ->leftJoin('hub_companies as ra', 'sl.hub_company_real_estate_agency_id', '=', 'ra.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'real_estate_developments as red', 'sl.real_estate_development_id', '=', 'red.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'blueprints as bp', 'sl.blueprint_id', '=', 'bp.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'proposal_models as pm', 'sl.proposal_model_id', '=', 'pm.id')
@@ -109,7 +93,7 @@ class DataImportCommand extends Command
                 ->leftJoin(config('sp-hub.table_prefix') . 'users as us4', 'sl.justified_user_id', '=', 'us4.id')
                 ->select(
                     'sl.*',
-                    'ra.uuid as real_estate_agency_uuid',
+                    'ra.uuid as hub_company_real_estate_agency_uuid',
                     'red.uuid as real_estate_development_uuid',
                     'bp.uuid as blueprint_uuid',
                     'pm.uuid as proposal_model_uuid',
@@ -127,7 +111,7 @@ class DataImportCommand extends Command
                 Sale::class,
                 'Sale',
                 [
-                    'real_estate_agency' => RealEstateAgency::class,
+                    'hub_company_real_estate_agency_id' => HubCompany::class,
                     'real_estate_development' => RealEstateDevelopment::class,
                     'blueprint' => RealEstateDevelopment\Blueprint::class,
                     'proposal_model' => ProposalModel::class,
@@ -216,6 +200,7 @@ class DataImportCommand extends Command
      * @param string|null $label
      * @param array $related
      * @param array $dates
+     * @param array $uuid_names
      * @return void
      */
     private function syncData(

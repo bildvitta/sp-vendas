@@ -2,9 +2,9 @@
 
 namespace BildVitta\SpVendas\Factories;
 
+use BildVitta\Hub\Entities\HubCompany;
 use BildVitta\SpCrm\Models\Customer;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
-use BildVitta\SpVendas\Models\RealEstateAgency;
 use BildVitta\SpVendas\Models\Sale;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -47,7 +47,7 @@ class SaleFactory extends Factory
             'blueprint_id' => $realEstateDevelopment->blueprints()->inRandomOrder()->first(),
             'proposal_model_id' => $realEstateDevelopment->proposal_models()->inRandomOrder()->first(),
             'buying_options_id' => $realEstateDevelopment->buying_options()->inRandomOrder()->first(),
-            'real_estate_agency_id' => RealEstateAgency::inRandomOrder()->first(),
+            'hub_company_real_estate_agency_id' => HubCompany::inRandomOrder()->first(),
             'justified_user_id' => config('sp-vendas.model_user')::inRandomOrder()->first(),
 
             'contract_ref_uuid' => fake()->uuid(),

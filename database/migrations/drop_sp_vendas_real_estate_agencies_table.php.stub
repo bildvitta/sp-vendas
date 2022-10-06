@@ -1,0 +1,80 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    private string $tableName;
+
+    public function __construct()
+    {
+        $this->tableName = config('sp-vendas.table_prefix') . 'real_estate_agencies';
+    }
+
+    public function up()
+    {
+        if (Schema::hasTable($this->tableName)) {
+            Schema::table($this->tableName, function (Blueprint $table) {
+                Schema::disableForeignKeyConstraints();
+                $table->dropForeign('vendas_r_e_agency_hub_company_foreign');
+                Schema::enableForeignKeyConstraints();
+            });
+
+            Schema::dropIfExists($this->tableName);
+        }
+    }
+
+    public function down()
+    {
+        if (!Schema::hasTable($this->tableName)) {
+            Schema::create($this->tableName, function (Blueprint $table) {
+                $table->id();
+                $table->uuid('uuid')->unique();
+
+                $table->string('name', 255);
+                $table->string('company_name', 255);
+                $table->string('document', 255);
+                $table->string('creci', 255)->nullable();
+                $table->string('ie', 255)->nullable();
+
+                $table->string('postal_code', 255)->nullable();
+                $table->string('address', 255)->nullable();
+                $table->string('street_number', 255)->nullable();
+                $table->string('city', 255)->nullable();
+                $table->string('state', 255)->nullable();
+                $table->string('complement', 255)->nullable();
+                $table->string('neighborhood', 255)->nullable();
+
+                $table->string('email', 255);
+                $table->string('phone', 255)->nullable();
+                $table->string('phone_two', 255)->nullable();
+
+                $table->string('representative_name', 255)->nullable();
+                $table->string('representative_nationality', 255)->nullable();
+                $table->string('representative_occupation', 255)->nullable();
+                $table->string('representative_document', 255)->nullable();
+                $table->string('representative_rg', 255)->nullable();
+
+                $table->string('representative_two_name', 255)->nullable();
+                $table->string('representative_two_nationality', 255)->nullable();
+                $table->string('representative_two_occupation', 255)->nullable();
+                $table->string('representative_two_document', 255)->nullable();
+                $table->string('representative_two_rg', 255)->nullable();
+
+                $table->string('external_code', 255)->nullable();
+
+                $table->foreignId('hub_company_id');
+
+                $table->timestamps();
+                $table->softDeletes();
+
+                Schema::disableForeignKeyConstraints();
+                $table->foreign('hub_company_id', 'vendas_r_e_agency_hub_company_foreign')
+                    ->references('id')->on('hub_companies')->onUpdate('cascade')->onDelete('cascade');
+                Schema::enableForeignKeyConstraints();
+            });
+        }
+    }
+};
