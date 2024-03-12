@@ -2,16 +2,12 @@
 
 namespace BildVitta\SpVendas\Console\Commands;
 
-use App\Models\HubCompany;
-use App\Models\User;
 use BildVitta\SpCrm\Models\Customer;
 use BildVitta\SpProduto\Models\Accessory;
 use BildVitta\SpProduto\Models\AccessoryCategory;
 use BildVitta\SpProduto\Models\BuyingOption;
 use BildVitta\SpProduto\Models\ProposalModel;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
-use BildVitta\SpVendas\Models\Personalization;
-use BildVitta\SpVendas\Models\RealEstateAgency;
 use BildVitta\SpVendas\Models\Sale;
 use BildVitta\SpVendas\Models\SaleAccessory;
 use BildVitta\SpVendas\Models\SalePeriodicity;
@@ -23,6 +19,16 @@ use Illuminate\Support\Facades\DB;
 
 class DataImportCommand extends Command
 {
+    /**
+     * @var string $modelUser
+     */
+    protected string $modelUser;
+
+    /**
+     * @var string $modelCompany
+     */
+    protected string $modelCompany;
+
     /**
      * The name and signature of the console command.
      *
@@ -36,12 +42,9 @@ class DataImportCommand extends Command
      * @var string[] $sync
      */
     protected $sync = [
-        'hub_companies',
-        'real_estate_agencies',
         'sales',
         'sale_accessories',
         'sale_periodicities',
-        'sale_personalizations',
     ];
 
     /**
@@ -62,41 +65,16 @@ class DataImportCommand extends Command
     {
         $this->info('Starting import');
 
+        $this->modelUser = config('sp-vendas.model_user');
+        $this->modelCompany = config('sp-vendas.model_company');
+
         $this->configConnection();
         $database = DB::connection('vendas');
-
-        // Sync Hub Companies
-        if (in_array('hub_companies', $this->sync)) {
-            $hub_companies = $database->table('hub_companies');
-
-            $this->syncData(
-                $hub_companies,
-                HubCompany::class,
-                'Hub companies',
-                [],
-                ['created_at', 'updated_at', 'deleted_at']
-            );
-        }
-
-        // Real Estate Agencies
-        if (in_array('real_estate_agencies', $this->sync)) {
-            $real_estate_agencies = $database->table('real_estate_agencies as ra')
-                ->leftJoin('hub_companies as hc', 'ra.hub_company_id', '=', 'hc.id')
-                ->select('ra.*', 'hc.uuid as hub_company_uuid');
-
-            $this->syncData(
-                $real_estate_agencies,
-                RealEstateAgency::class,
-                'RealEstateAgency',
-                ['hub_company' => HubCompany::class],
-                ['created_at', 'updated_at', 'deleted_at']
-            );
-        }
 
         // Sales
         if (in_array('sales', $this->sync)) {
             $sales = $database->table('sales as sl')
-                ->leftJoin('real_estate_agencies as ra', 'sl.real_estate_agency_id', '=', 'ra.id')
+                ->leftJoin('hub_companies as ra', 'sl.real_estate_agency_id', '=', 'ra.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'real_estate_developments as red', 'sl.real_estate_development_id', '=', 'red.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'blueprints as bp', 'sl.blueprint_id', '=', 'bp.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'proposal_models as pm', 'sl.proposal_model_id', '=', 'pm.id')
@@ -109,7 +87,7 @@ class DataImportCommand extends Command
                 ->leftJoin(config('sp-hub.table_prefix') . 'users as us4', 'sl.justified_user_id', '=', 'us4.id')
                 ->select(
                     'sl.*',
-                    'ra.uuid as real_estate_agency_uuid',
+                    'ra.uuid as hub_company_real_estate_agency_uuid',
                     'red.uuid as real_estate_development_uuid',
                     'bp.uuid as blueprint_uuid',
                     'pm.uuid as proposal_model_uuid',
@@ -127,17 +105,17 @@ class DataImportCommand extends Command
                 Sale::class,
                 'Sale',
                 [
-                    'real_estate_agency' => RealEstateAgency::class,
+                    'hub_company_real_estate_agency' => $this->modelCompany,
                     'real_estate_development' => RealEstateDevelopment::class,
                     'blueprint' => RealEstateDevelopment\Blueprint::class,
                     'proposal_model' => ProposalModel::class,
                     'buying_option' => BuyingOption::class,
                     'unit' => RealEstateDevelopment\Unit::class,
                     'crm_customer' => Customer::class,
-                    'user_hub_seller' => User::class,
-                    'user_hub_manager' => User::class,
-                    'user_hub_supervisor' => User::class,
-                    'justified_user' => User::class,
+                    'user_hub_seller' => $this->modelUser,
+                    'user_hub_manager' => $this->modelUser,
+                    'user_hub_supervisor' => $this->modelUser,
+                    'justified_user' => $this->modelUser,
                 ],
                 [
                     'created_at',
@@ -189,22 +167,6 @@ class DataImportCommand extends Command
                 SalePeriodicity::class,
                 'SalePeriodicity',
                 ['sale' => Sale::class],
-                ['created_at', 'updated_at', 'deleted_at']
-            );
-        }
-
-        // Sale Personalizations
-        if (in_array('sale_personalizations', $this->sync)) {
-            $sale_personalizations = $database->table('sale_personalizations as sp')
-                ->leftJoin('sales as sl', 'sp.sale_id', '=', 'sl.id')
-                ->leftJoin(config('sp-produto.table_prefix') . 'units as un', 'sp.unit_id', '=', 'un.id')
-                ->select('sp.*', 'sl.uuid as sale_uuid', 'un.uuid as unit_uuid');
-
-            $this->syncData(
-                $sale_personalizations,
-                Personalization::class,
-                'SalePersonalization',
-                ['sale' => Sale::class, 'unit' => RealEstateDevelopment\Unit::class],
                 ['created_at', 'updated_at', 'deleted_at']
             );
         }

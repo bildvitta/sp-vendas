@@ -1,13 +1,10 @@
 <?php
 
-use App\Models\User;
-use BildVitta\Hub\Entities\HubCompany;
-
 return [
     'table_prefix' => env('MS_SP_VENDAS_TABLE_PREFIX', 'vendas_'),
 
-    'model_user' => env('MS_SP_VENDAS_USER_MODEL', User::class),
-    'model_company' => env('MS_SP_VENDAS_COMPANY_MODEL', HubCompany::class),
+    'model_user' => env('MS_SP_VENDAS_USER_MODEL', \App\Models\User::class),
+    'model_company' => env('MS_SP_VENDAS_COMPANY_MODEL', \BildVitta\Hub\Entities\HubCompany::class),
 
     'db' => [
         'host' => env('VENDAS_DB_HOST'),

@@ -7,8 +7,6 @@ use BildVitta\SpProduto\Models\BuyingOption;
 use BildVitta\SpProduto\Models\ProposalModel;
 use BildVitta\SpProduto\Models\RealEstateDevelopment;
 use BildVitta\SpProduto\Models\RealEstateDevelopment\Unit;
-use BildVitta\SpVendas\Models\Personalization;
-use BildVitta\SpVendas\Models\RealEstateAgency;
 use BildVitta\SpVendas\Models\Sale;
 use BildVitta\SpVendas\Models\SaleAccessory;
 use BildVitta\SpVendas\Models\SalePeriodicity;
@@ -39,6 +37,11 @@ class MessageSale
      * @var string $modelUser
      */
     protected string $modelUser;
+
+    /**
+     * @var string $modelCompany
+     */
+    protected string $modelCompany;
 
     /**
      * @param AMQPMessage $message
@@ -76,11 +79,11 @@ class MessageSale
     {
         $this->sale = $sale;
         $this->modelUser = config('sp-vendas.model_user');
+        $this->modelCompany = config('sp-vendas.model_company');
 
         $saleObj = $this->syncSale();
 
         $this->syncPeriodicities($saleObj);
-        $this->syncPersonalizations($saleObj);
     }
 
     /**
@@ -125,7 +128,7 @@ class MessageSale
             'user_hub_manager_id' => $this->syncRelated('user_hub_manager', $this->modelUser, 'hub_uuid'),
             'user_hub_supervisor_id' => $this->syncRelated('user_hub_supervisor', $this->modelUser, 'hub_uuid'),
             'justified_user_id' => $this->syncRelated('justified_user', $this->modelUser, 'hub_uuid'),
-            'real_estate_agency_id' => $this->syncRelated('real_estate_agency', RealEstateAgency::class),
+            'hub_company_real_estate_agency_id' => $this->syncRelated('hub_company_real_estate_agency', $this->modelCompany),
         ];
 
         return Sale::updateOrCreate(['uuid' => $this->sale->uuid], $data);
@@ -163,30 +166,6 @@ class MessageSale
             ];
 
             SalePeriodicity::updateOrCreate(['uuid' => $periodicity->uuid], $data);
-        }
-    }
-
-    /**
-     * @param Sale $sale
-     * @return void
-     */
-    private function syncPersonalizations(Sale $sale): void
-    {
-        foreach ($this->sale->personalizations as $personalization) {
-            $data = [
-                'uuid' => $personalization->uuid,
-                'unit_id' => $sale->unit_id,
-                'sale_id' => $sale->id,
-                'description' => $personalization->description,
-                'file' => $personalization->file,
-                'value' => $personalization->value,
-                'type' => $personalization->type,
-                'created_at' => $personalization->created_at,
-                'updated_at' => $personalization->updated_at,
-                'deleted_at' => $personalization->deleted_at,
-            ];
-
-            Personalization::updateOrCreate(['uuid' => $personalization->uuid], $data);
         }
     }
 }

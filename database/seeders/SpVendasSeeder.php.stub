@@ -5,8 +5,6 @@ namespace Database\Seeders;
 use BildVitta\SpVendas\Models\Sale;
 use BildVitta\SpVendas\Models\SaleAccessory;
 use BildVitta\SpVendas\Models\SalePeriodicity;
-use BildVitta\SpVendas\Models\RealEstateAgency;
-use BildVitta\SpVendas\Models\Personalization;
 use Illuminate\Database\Seeder;
 
 class SpVendasSeeder extends Seeder
@@ -18,10 +16,8 @@ class SpVendasSeeder extends Seeder
      */
     public function run(): void
     {
-        RealEstateAgency::factory(10)->create();
         Sale::factory(10)->create();
         SaleAccessory::factory(10)->create();
         SalePeriodicity::factory(10)->create();
-        Personalization::factory(10)->create();
     }
 }
