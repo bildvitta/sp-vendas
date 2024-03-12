@@ -24,7 +24,7 @@ return [
             'sales' => env('RABBITMQ_EXCHANGE_SALES', 'sales'),
         ],
         'queue' => [
-            'sales' => env('RABBITMQ_QUEUE_SALES', 'sales.juridico'),
+            'sales' => env('RABBITMQ_QUEUE_SALES', 'sales.crm'),
         ]
     ],
 ];
