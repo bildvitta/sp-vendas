@@ -16,7 +16,7 @@ composer require bildvitta/sp-vendas
 For everything to work perfectly in addition to having the settings file published in your application, run the command below:
 
 ```bash
-php artisan sp:install
+php artisan sp-vendas:install
 ```
 
 ## Configuration

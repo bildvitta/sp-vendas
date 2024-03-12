@@ -83,7 +83,7 @@ class Sale extends BaseModel
         'buying_options_id',
         'contract_ref_uuid',
         'concretized',
-        'real_estate_agency_id',
+        'hub_company_real_estate_agency_id',
         'special_needs',
         'input',
         'price_total',
@@ -172,7 +172,7 @@ class Sale extends BaseModel
      */
     public function seller(): BelongsTo
     {
-        return $this->belongsTo(HubUser::class, 'user_hub_seller_id');
+        return $this->belongsTo(HubUser::class, 'user_hub_seller_id')->withTrashed();
     }
 
     /**
@@ -180,7 +180,7 @@ class Sale extends BaseModel
      */
     public function unit(): BelongsTo
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Unit::class)->withTrashed();
     }
 
     /**
@@ -188,7 +188,7 @@ class Sale extends BaseModel
      */
     public function manager(): BelongsTo
     {
-        return $this->belongsTo(HubUser::class);
+        return $this->belongsTo(HubUser::class)->withTrashed();
     }
 
     /**
@@ -196,7 +196,7 @@ class Sale extends BaseModel
      */
     public function supervisor(): BelongsTo
     {
-        return $this->belongsTo(HubUser::class);
+        return $this->belongsTo(HubUser::class)->withTrashed();
     }
 
     /**
@@ -244,9 +244,9 @@ class Sale extends BaseModel
         return $this->hasMany(SaleAccessory::class);
     }
 
-    public function real_estate_agency(): BelongsTo
+    public function hub_company_real_estate_agency(): BelongsTo
     {
-        return $this->belongsTo(RealEstateAgency::class, 'real_estate_agency_id', 'id');
+        return $this->belongsTo(app(config('sp-vendas.model_company')), 'hub_company_real_estate_agency_id', 'id')->withTrashed();
     }
 
     /**
@@ -254,7 +254,7 @@ class Sale extends BaseModel
      */
     public function made_by_user(): BelongsTo
     {
-        return $this->belongsTo(HubUser::class, 'made_by');
+        return $this->belongsTo(HubUser::class, 'made_by')->withTrashed();
     }
 
     /**
@@ -262,17 +262,7 @@ class Sale extends BaseModel
      */
     public function justified_user(): BelongsTo
     {
-        return $this->belongsTo(HubUser::class, 'justified_user_id', 'id');
-    }
-
-    public function personalizations(): HasMany
-    {
-        return $this->hasMany(Personalization::class, 'sale_id', 'id');
-    }
-
-    public function has_personalization(): int
-    {
-        return $this->personalizations()->count();
+        return $this->belongsTo(HubUser::class, 'justified_user_id', 'id')->withTrashed();
     }
 
     /**
@@ -280,7 +270,7 @@ class Sale extends BaseModel
      */
     public function real_estate_development(): BelongsTo
     {
-        return $this->belongsTo(RealEstateDevelopment::class);
+        return $this->belongsTo(RealEstateDevelopment::class)->withTrashed();
     }
 
     /**
