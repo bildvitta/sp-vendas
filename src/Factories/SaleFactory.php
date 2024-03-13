@@ -39,15 +39,15 @@ class SaleFactory extends Factory
 
             'real_estate_development_id' => $realEstateDevelopment,
             'unit_id' => $realEstateDevelopment->unities()->inRandomOrder()->first(),
-            'user_hub_seller_id' => config('sp-vendas.model_user')::inRandomOrder()->first(),
-            'user_hub_manager_id' => config('sp-vendas.model_user')::inRandomOrder()->first(),
-            'user_hub_supervisor_id' => config('sp-vendas.model_user')::inRandomOrder()->first(),
+            'user_hub_seller_id' => config('hub.model_user')::inRandomOrder()->first(),
+            'user_hub_manager_id' => config('hub.model_user')::inRandomOrder()->first(),
+            'user_hub_supervisor_id' => config('hub.model_user')::inRandomOrder()->first(),
             'crm_customer_id' => $crm_customer,
             'blueprint_id' => $realEstateDevelopment->blueprints()->inRandomOrder()->first(),
             'proposal_model_id' => $realEstateDevelopment->proposal_models()->inRandomOrder()->first(),
-            'buying_options_id' => $realEstateDevelopment->buying_options()->inRandomOrder()->first(),
-            'hub_company_real_estate_agency_id' => config('sp-vendas.model_company')::inRandomOrder()->first(),
-            'justified_user_id' => config('sp-vendas.model_user')::inRandomOrder()->first(),
+            'buying_option_id' => $realEstateDevelopment->buying_options()->inRandomOrder()->first(),
+            'hub_company_real_estate_agency_id' => config('hub.model_company')::inRandomOrder()->first(),
+            'justified_user_id' => config('hub.model_user')::inRandomOrder()->first(),
 
             'contract_ref_uuid' => fake()->uuid(),
             'concretized' => fake()->boolean(),
@@ -68,7 +68,7 @@ class SaleFactory extends Factory
             'status' => fake()->randomElement(Sale::STATUS),
             'signed_contract_at' => fake()->date(),
             'bill_paid_at' => fake()->date(),
-            'made_by' => config('sp-vendas.model_user')::inRandomOrder()->first(),
+            'made_by' => config('hub.model_user')::inRandomOrder()->first(),
         ];
     }
 }

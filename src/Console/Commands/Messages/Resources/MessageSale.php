@@ -78,8 +78,8 @@ class MessageSale
     private function updateOrCreate(stdClass $sale): void
     {
         $this->sale = $sale;
-        $this->modelUser = config('sp-vendas.model_user');
-        $this->modelCompany = config('sp-vendas.model_company');
+        $this->modelUser = config('hub.model_user');
+        $this->modelCompany = config('hub.model_company');
 
         $saleObj = $this->syncSale();
 
@@ -121,7 +121,7 @@ class MessageSale
             'real_estate_development_id' => $this->syncRelated('real_estate_development', RealEstateDevelopment::class),
             'blueprint_id' => $this->syncRelated('blueprint', RealEstateDevelopment\Blueprint::class),
             'proposal_model_id' => $this->syncRelated('proposal_model', ProposalModel::class),
-            'buying_options_id' => $this->syncRelated('buying_option', BuyingOption::class),
+            'buying_option_id' => $this->syncRelated('buying_option', BuyingOption::class),
             'unit_id' => $this->syncRelated('unit', Unit::class),
             'crm_customer_id' => $this->syncRelated('crm_customer', Customer::class),
             'user_hub_seller_id' => $this->syncRelated('user_hub_seller', $this->modelUser, 'hub_uuid'),

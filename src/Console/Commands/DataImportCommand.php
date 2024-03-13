@@ -65,8 +65,8 @@ class DataImportCommand extends Command
     {
         $this->info('Starting import');
 
-        $this->modelUser = config('sp-vendas.model_user');
-        $this->modelCompany = config('sp-vendas.model_company');
+        $this->modelUser = config('hub.model_user');
+        $this->modelCompany = config('hub.model_company');
 
         $this->configConnection();
         $database = DB::connection('vendas');
@@ -74,7 +74,7 @@ class DataImportCommand extends Command
         // Sales
         if (in_array('sales', $this->sync)) {
             $sales = $database->table('sales as sl')
-                ->leftJoin('hub_companies as ra', 'sl.real_estate_agency_id', '=', 'ra.id')
+                ->leftJoin('hub_companies as ra', 'sl.hub_company_real_estate_agency_id', '=', 'ra.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'real_estate_developments as red', 'sl.real_estate_development_id', '=', 'red.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'blueprints as bp', 'sl.blueprint_id', '=', 'bp.id')
                 ->leftJoin(config('sp-produto.table_prefix') . 'proposal_models as pm', 'sl.proposal_model_id', '=', 'pm.id')
@@ -99,6 +99,8 @@ class DataImportCommand extends Command
                     'us3.hub_uuid as user_hub_supervisor_uuid',
                     'us4.hub_uuid as justified_user_uuid',
                 );
+            
+            // dd($sales->toSql());
 
             $this->syncData(
                 $sales,
@@ -130,6 +132,7 @@ class DataImportCommand extends Command
             );
         }
 
+        /*
         // Sale Accessories
         if (in_array('sale_accessories', $this->sync)) {
             $sale_accessories = $database->table('sale_accessories as sa')
@@ -170,6 +173,7 @@ class DataImportCommand extends Command
                 ['created_at', 'updated_at', 'deleted_at']
             );
         }
+        */
     }
 
     /**
