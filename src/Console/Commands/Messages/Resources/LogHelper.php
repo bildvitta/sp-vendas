@@ -2,6 +2,7 @@
 
 namespace BildVitta\SpVendas\Console\Commands\Messages\Resources;
 
+use BildVitta\SpVendas\Models\Worker;
 use Throwable;
 
 trait LogHelper
@@ -15,7 +16,7 @@ trait LogHelper
     private function logError(Throwable $exception, mixed $message): void
     {
         try {
-            $worker = new \App\Models\Worker();
+            $worker = new Worker();
             $worker->type = 'rabbitmq.worker.error';
             $worker->payload = [
                 'message' => $message

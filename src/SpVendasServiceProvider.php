@@ -2,7 +2,7 @@
 
 namespace BildVitta\SpVendas;
 
-use BildVitta\SpVendas\Console\Commands\DataImportCommand;
+use BildVitta\SpVendas\Console\Commands\DataImport\Sales\SaleImportCommand;
 use BildVitta\SpVendas\Console\Commands\Messages\SalesWorkerCommand;
 use BildVitta\SpVendas\Console\InstallSp;
 use Spatie\LaravelPackageTools\Package;
@@ -47,7 +47,7 @@ class SpVendasServiceProvider extends PackageServiceProvider
             ->hasCommands([
                 InstallSp::class,
                 SalesWorkerCommand::class,
-                DataImportCommand::class,
+                SaleImportCommand::class,
             ]);
 
         $this->publishes([

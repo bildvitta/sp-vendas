@@ -2,11 +2,6 @@
 
 namespace BildVitta\SpVendas\Console\Commands\Messages\Resources;
 
-use BildVitta\SpCrm\Models\Customer;
-use BildVitta\SpProduto\Models\BuyingOption;
-use BildVitta\SpProduto\Models\ProposalModel;
-use BildVitta\SpProduto\Models\RealEstateDevelopment;
-use BildVitta\SpProduto\Models\RealEstateDevelopment\Unit;
 use BildVitta\SpVendas\Models\Sale;
 use BildVitta\SpVendas\Models\SaleAccessory;
 use BildVitta\SpVendas\Models\SalePeriodicity;
@@ -78,12 +73,13 @@ class MessageSale
     private function updateOrCreate(stdClass $sale): void
     {
         $this->sale = $sale;
-        $this->modelUser = config('sp-vendas.model_user');
-        $this->modelCompany = config('sp-vendas.model_company');
+        $this->modelUser = config('hub.model_user');
+        $this->modelCompany = config('hub.model_company');
 
         $saleObj = $this->syncSale();
 
         $this->syncPeriodicities($saleObj);
+        $this->syncAccessories($saleObj);
     }
 
     /**
@@ -93,6 +89,7 @@ class MessageSale
     {
         $data = [
             'uuid' => $this->sale->uuid,
+
             'external_code' => $this->sale->external_code,
             'contract_ref_uuid' => $this->sale->contract_ref_uuid,
             'concretized' => $this->sale->concretized,
@@ -114,21 +111,67 @@ class MessageSale
             'status' => $this->sale->status,
             'signed_contract_at' => $this->sale->signed_contract_at,
             'bill_paid_at' => $this->sale->bill_paid_at,
+
+
+            'real_estate_development_id' => optional(
+                config('sp-produto.model_real_estate_development')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->real_estate_development)
+            )->id,
+            'blueprint_id' => optional(
+                config('sp-produto.model_blueprint')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->blueprint)
+            )->id,
+            'proposal_model_id' => optional(
+                config('sp-produto.model_proposal_model')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->proposal_model)
+            )->id,
+            'buying_option_id' => optional(
+                config('sp-produto.model_buying_option')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->buying_option)
+            )->id,
+            'unit_id' => optional(
+                config('sp-produto.model_unit')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->unit)
+            )->id,
+            'crm_customer_id' => optional(
+                config('sp-crm.model_customer')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->crm_customer)
+            )->id,
+            'user_hub_seller_id' => optional(
+                config('hub.model_user')::withTrashed()
+                ->select('id')
+                ->firstWhere('hub_uuid', $this->sale->user_hub_seller)
+            )->id,
+            'user_hub_manager_id' => optional(
+                config('hub.model_user')::withTrashed()
+                ->select('id')
+                ->firstWhere('hub_uuid', $this->sale->user_hub_manager)
+            )->id,
+            'user_hub_supervisor_id' => optional(
+                config('hub.model_user')::withTrashed()
+                ->select('id')
+                ->firstWhere('hub_uuid', $this->sale->user_hub_supervisor)
+            )->id,
+            'justified_user_id' => optional(
+                config('hub.model_user')::withTrashed()
+                ->select('id')
+                ->firstWhere('hub_uuid', $this->sale->justified_user)
+            )->id,
+            'hub_company_real_estate_agency_id' => optional(
+                config('hub.model_company')::withTrashed()
+                ->select('id')
+                ->firstWhere('uuid', $this->sale->hub_company_real_estate_agency)
+            )->id,
+
             'created_at' => $this->sale->created_at,
             'updated_at' => $this->sale->updated_at,
             'deleted_at' => $this->sale->deleted_at,
-
-            'real_estate_development_id' => $this->syncRelated('real_estate_development', RealEstateDevelopment::class),
-            'blueprint_id' => $this->syncRelated('blueprint', RealEstateDevelopment\Blueprint::class),
-            'proposal_model_id' => $this->syncRelated('proposal_model', ProposalModel::class),
-            'buying_options_id' => $this->syncRelated('buying_option', BuyingOption::class),
-            'unit_id' => $this->syncRelated('unit', Unit::class),
-            'crm_customer_id' => $this->syncRelated('crm_customer', Customer::class),
-            'user_hub_seller_id' => $this->syncRelated('user_hub_seller', $this->modelUser, 'hub_uuid'),
-            'user_hub_manager_id' => $this->syncRelated('user_hub_manager', $this->modelUser, 'hub_uuid'),
-            'user_hub_supervisor_id' => $this->syncRelated('user_hub_supervisor', $this->modelUser, 'hub_uuid'),
-            'justified_user_id' => $this->syncRelated('justified_user', $this->modelUser, 'hub_uuid'),
-            'hub_company_real_estate_agency_id' => $this->syncRelated('hub_company_real_estate_agency', $this->modelCompany),
         ];
 
         return Sale::updateOrCreate(['uuid' => $this->sale->uuid], $data);
@@ -155,17 +198,52 @@ class MessageSale
         foreach ($this->sale->periodicities as $periodicity) {
             $data = [
                 'uuid' => $periodicity->uuid,
+
                 'sale_id' => $sale->id,
                 'periodicity' => $periodicity->periodicity,
                 'installments' => $periodicity->installments,
                 'installment_price' => $periodicity->installment_price,
+                'installment_amount' => $periodicity->installment_amount,
+                'payment_method' => $periodicity->payment_method,
                 'due_at' => $periodicity->due_at,
+
                 'created_at' => $periodicity->created_at,
                 'updated_at' => $periodicity->updated_at,
                 'deleted_at' => $periodicity->deleted_at,
             ];
 
             SalePeriodicity::updateOrCreate(['uuid' => $periodicity->uuid], $data);
+        }
+    }
+
+    /**
+     * @param Sale $sale
+     * @return void
+     */
+    private function syncAccessories(Sale $sale): void
+    {
+        foreach ($this->sale->accessories as $accessory) {
+            $data = [
+                'uuid' => $accessory->uuid,
+
+                'sale_id' => $sale->id,
+                'accessory_category_id' => optional(
+                    config('sp-produto.model_accessory_category')::withTrashed()
+                    ->select('id')
+                    ->firstWhere('uuid', $accessory->category?->uuid)
+                )->id,
+                'accessory_id' => optional(
+                    config('sp-produto.model_real_estate_development_accessory')::withTrashed()
+                    ->select('id')
+                    ->firstWhere('uuid', $accessory->accessory?->uuid)
+                )->id,
+
+                'created_at' => $accessory->created_at,
+                'updated_at' => $accessory->updated_at,
+                'deleted_at' => $accessory->deleted_at,
+            ];
+
+            SaleAccessory::updateOrCreate(['uuid' => $accessory->uuid], $data);
         }
     }
 }

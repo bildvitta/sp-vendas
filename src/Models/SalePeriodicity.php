@@ -2,8 +2,6 @@
 
 namespace BildVitta\SpVendas\Models;
 
-use BildVitta\SpVendas\Factories\SalePeriodicityFactory;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,6 +17,7 @@ class SalePeriodicity extends BaseModel
     use SoftDeletes;
 
     public const PERIODICITY_LIST = [
+        // produto
         'financing' => 'Financiamento',
         'fgts' => 'FGTS',
         'subsidy' => 'Subsídio',
@@ -30,6 +29,9 @@ class SalePeriodicity extends BaseModel
         'quarterly' => 'Trimestral',
         'semiannual' => 'Semestral',
         'yearly' => 'Anual',
+        'conclusion_balance' => 'Saldo Conclusão',
+
+        //vendas
         'signal' => 'Sinal',
         'periodicity' => 'Periodicidade',
         'final' => 'Final',
@@ -44,27 +46,22 @@ class SalePeriodicity extends BaseModel
     }
 
     /**
-     * Create a new factory instance for the model.
-     *
-     * @return Factory
-     */
-    protected static function newFactory(): Factory
-    {
-        return SalePeriodicityFactory::new();
-    }
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
         'uuid',
+
+        'sale_id',
         'periodicity',
         'installments',
         'installment_price',
+        'installment_amount',
+        'payment_method',
         'due_at',
-        'sale_id',
+        
+
         'created_at',
         'updated_at',
         'deleted_at',
@@ -75,29 +72,15 @@ class SalePeriodicity extends BaseModel
      *
      * @var array
      */
-    protected $casts = ['due_at' => 'date:Y-m-d'];
+    protected $casts = [
 
-    /**
-     * Bootstrap the model and its traits.
-     *
-     * @return void
-     */
-    public static function boot(): void
-    {
-        parent::boot();
-
-        self::creating(function (SalePeriodicity $periodicity) {
-            if (empty($periodicity->due_at)) {
-                $periodicity->due_at = now();
-            }
-        });
-    }
+    ];
 
     /**
      * @return BelongsTo
      */
     public function sale(): BelongsTo
     {
-        return $this->belongsTo(Sale::class);
+        return $this->belongsTo(Sale::class, 'sale_id');
     }
 }
