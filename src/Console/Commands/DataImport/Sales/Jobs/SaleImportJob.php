@@ -261,11 +261,11 @@ class SaleImportJob extends BaseJob
                 'sp.*',
                 's.uuid as sale_uuid',
             ]);
-            if (is_null($this->worker->payload->total)) {
-                $payload = $this->worker->payload;
-                $payload->total = $query->count();
-                $this->worker->update(['payload' => $payload]);
-            }
+        if (is_null($this->worker->payload->total)) {
+            $payload = $this->worker->payload;
+            $payload->total = $query->count();
+            $this->worker->update(['payload' => $payload]);
+        }
     
         if ($this->worker->payload->total > 0) {
             $query->limit($this->worker->payload->limit)->offset($this->worker->payload->offset);
