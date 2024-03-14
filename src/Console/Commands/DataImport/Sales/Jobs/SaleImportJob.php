@@ -152,7 +152,7 @@ class SaleImportJob extends BaseJob
                     ->firstWhere('hub_uuid', $item->user_hub_seller_uuid)
                 )->id;
 
-                $user_hub_manager_id = optional(
+                $item->user_hub_manager_id = optional(
                     config('hub.model_user')::withTrashed()
                     ->select('id')
                     ->firstWhere('hub_uuid', $item->user_hub_manager_uuid)
@@ -205,10 +205,94 @@ class SaleImportJob extends BaseJob
                 'reda.uuid as real_estate_development_accessory_uuid',
                 'ac.uuid as accessory_category_uuid',
             ]);
+        
+        if (is_null($this->worker->payload->total)) {
+            $payload = $this->worker->payload;
+            $payload->total = $query->count();
+            $this->worker->update(['payload' => $payload]);
+        }
+
+        if ($this->worker->payload->total > 0) {
+            $query->limit($this->worker->payload->limit)->offset($this->worker->payload->offset);
+            $query->get()->each(function ($item) {
+
+                $item->sale_id = optional(
+                    config('sp-vendas.model_sale')::withTrashed()
+                    ->select('id')
+                    ->firstWhere('uuid', $item->sale_uuid)
+                )->id;
+
+                $item->accessory_id = optional(
+                    config('sp-produto.model_real_estate_development_accessory')::withTrashed()
+                    ->select('id')
+                    ->firstWhere('uuid', $item->real_estate_development_accessory_uuid)
+                )->id;
+
+                $item->accessory_category_uuid = optional(
+                    config('sp-produto.model_accessory_category')::withTrashed()
+                    ->select('id')
+                    ->firstWhere('uuid', $item->accessory_category_uuid)
+                )->id;
+
+                $dates = [
+                    'created_at',
+                    'updated_at',
+                    'deleted_at',
+                ];
+                foreach ($dates as $date) {
+                    if (!empty($item->{$date})) {
+                        $item->{$date} = Carbon::parse($item->{$date})->greaterThan('0001-01-01 23:59:59') ? $item->{$date} : null;
+                    }
+                }
+
+                config('sp-vendas.model_sale_accessory')::withTrashed()
+                    ->firstOrNew(['uuid' => $item->uuid])
+                    ->fill(collect($item)->toArray())
+                    ->save();
+            });
+        }
     }
 
     protected function syncSalePeriodicities(): void
     {
+        $query = DB::connection('vendas')->table('sale_periodicities as sp')
+            ->leftJoin('sales as s', 'sp.sale_id', '=', 's.id')
+            ->select([
+                'sp.*',
+                's.uuid as sale_uuid',
+            ]);
+            if (is_null($this->worker->payload->total)) {
+                $payload = $this->worker->payload;
+                $payload->total = $query->count();
+                $this->worker->update(['payload' => $payload]);
+            }
+    
+        if ($this->worker->payload->total > 0) {
+            $query->limit($this->worker->payload->limit)->offset($this->worker->payload->offset);
+            $query->get()->each(function ($item) {
 
+                $item->sale_id = optional(
+                    config('sp-vendas.model_sale')::withTrashed()
+                    ->select('id')
+                    ->firstWhere('uuid', $item->sale_uuid)
+                )->id;
+
+                $dates = [
+                    'created_at',
+                    'updated_at',
+                    'deleted_at',
+                ];
+                foreach ($dates as $date) {
+                    if (!empty($item->{$date})) {
+                        $item->{$date} = Carbon::parse($item->{$date})->greaterThan('0001-01-01 23:59:59') ? $item->{$date} : null;
+                    }
+                }
+
+                config('sp-vendas.model_sale_periodicity')::withTrashed()
+                    ->firstOrNew(['uuid' => $item->uuid])
+                    ->fill(collect($item)->toArray())
+                    ->save();
+            });
+        }
     }
 }
