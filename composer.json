@@ -11,14 +11,14 @@
         }
     },
     "require": {
-        "php": "^8.0|^8.1",
+        "php": "^8.0|^8.1|^8.2|^8.3",
         "bildvitta/iss-sdk": "^0.1",
         "bildvitta/sp-crm": "^0.1",
         "bildvitta/sp-hub": "^0.1",
         "bildvitta/sp-produto": "^0.1",
-        "illuminate/contracts": "^8.0|^9.0",
-        "illuminate/database": "^8.0|^9.0",
-        "illuminate/support": "^8.0|^9.0",
+        "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0",
+        "illuminate/database": "^8.0|^9.0|^10.0|^11.0",
+        "illuminate/support": "^8.0|^9.0|^10.0|^11.0",
         "php-amqplib/php-amqplib": "^3.2.0",
         "spatie/laravel-package-tools": "^1.12"
     },
